@@ -14,12 +14,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <h3>Job queue</h3>
-                        <ul class="list-group">
-                            <li class="list-group-item active">Cras justo odio</li>
-                            <li class="list-group-item">Dapibus ac facilisis in</li>
-                            <li class="list-group-item">Morbi leo risus</li>
-                            <li class="list-group-item">Porta ac consectetur ac</li>
-                            <li class="list-group-item">Vestibulum at eros</li>
+                        <ul class="list-group" id="jobQueue">
                         </ul>   
                     </div>                 
                 </div>
@@ -28,6 +23,8 @@
                 <div class="row">
                     <div class="col-md-12">
                         <h3>Ready queue</h3>
+                        <ul class="list-group">
+                        </ul> 
                     </div>
                 </div>
                 <div class="row my-2">
@@ -38,7 +35,7 @@
                                 <b>ID:</b>
                             </div>
                             <div class="col-md-10">
-                                <input type="text" class="form-control" name="id" placeholder="Process ID goes here" />
+                                <input type="text" class="form-control" name="id" id="jobId" placeholder="Process ID goes here" />
                             </div>
                         </div>
                         <div class="row my-2">
@@ -46,7 +43,7 @@
                                 <b>I/O Devices:</b>
                             </div>
                             <div class="col-md-10">
-                                <input type="checkbox" class="form-control" name="id" placeholder="Process ID goes here" />
+                                <input type="checkbox" class="form-control" name="devices" id="jobDevices" placeholder="Process ID goes here" />
                             </div>
                         </div>
                         <div class="row my-2">
@@ -54,12 +51,12 @@
                                 <b>Running time:</b>
                             </div>
                             <div class="col-md-9">
-                                <input type="number" class="form-control" name="id" placeholder="Process ID goes here" />
+                                <input type="number" class="form-control" name="time" id="jobTime" placeholder="Process ID goes here" />
                             </div>
                         </div>
                         <div class="row my-2">
                             <div class="col-md-12">
-                                <button type="button" class="btn btn-success float-right">Add Process</button>
+                                <button type="button" class="btn btn-success float-right" onclick="system.addProcess()">Add Process</button>
                             </div>
                         </div>
                     </div>
@@ -70,15 +67,49 @@
                     <div class="col-md-12">
                         <h3>CPU</h3>
                         <ul class="list-group">
-                            <li class="list-group-item active">Cras justo odio</li>
-                            <li class="list-group-item">Dapibus ac facilisis in</li>
-                            <li class="list-group-item">Morbi leo risus</li>
-                            <li class="list-group-item">Porta ac consectetur ac</li>
-                            <li class="list-group-item">Vestibulum at eros</li>
                         </ul>                  
                     </div>     
                 </div>
             </div>
         </div>
+        <script type="text/javascript">
+            // Global variables
+            let system = {
+                // List of jobs
+                jobs: [],
+                // Create job queue
+                createJobQueue: () => {
+                    let jobQueue = document.getElementById('jobQueue');
+
+                    for (let iJobs = 0; iJobs < system.jobs.length; iJobs++) {
+                        let li = document.createElement('li');
+                        li.className = 'list-group-item';
+                        let textNode = document.createTextNode(system.jobs[iJobs].text);
+                        li.appendChild(textNode);
+                        jobQueue.appendChild(li);
+                    }
+                },
+                // Add process to queue
+                addProcess: () => {
+                    // Add process
+                    system.jobs.unshift({
+                        text: document.getElementById('jobId').value,
+                        devices: document.getElementById('jobDevices').value,
+                        time: document.getElementById('jobTime').value
+                    });
+
+                    // Clear fields
+                    document.getElementById('jobId').value = '';
+                    document.getElementById('jobDevices').value = '';
+                    document.getElementById('jobTime').value = '';
+
+                    // Update job queue
+                    system.createJobQueue();
+                }
+            };
+
+            // Create job queue
+            system.createJobQueue();
+        </script>
     </body>
 </html>

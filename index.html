@@ -23,7 +23,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <h3>Ready queue</h3>
-                        <ul class="list-group">
+                        <ul class="list-group" id="readyQueue">
                         </ul> 
                     </div>
                 </div>
@@ -75,18 +75,43 @@
         <script type="text/javascript">
             // Global variables
             let system = {
-                // List of jobs
-                jobs: [],
+                jobs: [], // List of jobs
+                fromJobsToReadyTimeout: 2000, // Time in ms how much will take to move job from jobs to ready
+                readyQueue: [], // List of ready jobs
+                // Removes all child elements of a specific element
+                removeChilds: (element) => {
+                    while (element.firstChild) {
+                        element.removeChild(element.firstChild);
+                    }
+                },
                 // Create job queue
-                createJobQueue: () => {
+                updateJobQueue: () => {
                     let jobQueue = document.getElementById('jobQueue');
+                    
+                    // Removes all child elements
+                    system.removeChilds(jobQueue);
 
                     for (let iJobs = 0; iJobs < system.jobs.length; iJobs++) {
                         let li = document.createElement('li');
-                        li.className = 'list-group-item';
+                        li.className = (iJobs === system.jobs.length - 1) ? 'list-group-item active' : 'list-group-item';
                         let textNode = document.createTextNode(system.jobs[iJobs].text);
                         li.appendChild(textNode);
                         jobQueue.appendChild(li);
+                    }
+                },
+                // Create ready queue
+                updateReadyQueue: () => {
+                    let readyQueue = document.getElementById('readyQueue');
+
+                    // Removes all child elements
+                    system.removeChilds(readyQueue);
+
+                    for (let iJobs = 0; iJobs < system.readyQueue.length; iJobs++) {
+                        let li = document.createElement('li');
+                        li.className = (iJobs === system.jobs.length - 1) ? 'list-group-item active' : 'list-group-item';
+                        let textNode = document.createTextNode(system.readyQueue[iJobs].text);
+                        li.appendChild(textNode);
+                        readyQueue.appendChild(li);
                     }
                 },
                 // Add process to queue
@@ -104,12 +129,27 @@
                     document.getElementById('jobTime').value = '';
 
                     // Update job queue
-                    system.createJobQueue();
+                    system.updateJobQueue();
+                },
+                // Move jobs from jobs queue to ready queue
+                fromJobsToReady: () => {
+                    // If there are any jobs
+                    if (system.jobs.length > 0) {
+                        // Push a job to the ready queue
+                        system.readyQueue.push(system.jobs[system.jobs.length-1]);
+
+                        // Remove job from the job queue
+                        system.jobs.splice(-1, 1);
+                    }
+
+                    // Update ready queue
+                    system.updateReadyQueue();
+
+                    system.updateJobQueue();
                 }
             };
 
-            // Create job queue
-            system.createJobQueue();
+            setInterval(system.fromJobsToReady, 2000);
         </script>
     </body>
 </html>

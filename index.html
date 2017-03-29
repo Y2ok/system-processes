@@ -96,10 +96,24 @@
                     system.removeChilds(jobQueue);
 
                     for (let iJobs = 0; iJobs < system.jobs.length; iJobs++) {
+                        // Create li element
                         let li = document.createElement('li');
-                        li.className = (iJobs === system.jobs.length - 1) ? 'list-group-item active' : 'list-group-item';
+                        li.className = (iJobs === system.jobs.length - 1) ? 'list-group-item justify-content-between active' : 'list-group-item justify-content-between';
+
+                        // Create text node
                         let textNode = document.createTextNode(system.jobs[iJobs].text);
                         li.appendChild(textNode);
+
+                        // Create span node
+                        let span = document.createElement('span');
+                        span.className = 'badge badge-default badge-pill';
+
+                        // Create time node
+                        let timeNode = document.createTextNode(`${system.jobs[iJobs].time} s`);
+                        span.appendChild(timeNode);
+
+                        // Append elements
+                        li.appendChild(span);
                         jobQueue.appendChild(li);
                     }
                 },
@@ -111,10 +125,24 @@
                     system.removeChilds(readyQueue);
 
                     for (let iJobs = 0; iJobs < system.readyQueue.length; iJobs++) {
+                        // Create li element
                         let li = document.createElement('li');
-                        li.className = (iJobs === system.readyQueue.length - 1) ? 'list-group-item active' : 'list-group-item';
+                        li.className = (iJobs === system.readyQueue.length - 1) ? 'list-group-item justify-content-between active' : 'list-group-item justify-content-between';
+
+                        // Create text node
                         let textNode = document.createTextNode(system.readyQueue[iJobs].text);
                         li.appendChild(textNode);
+
+                        // Create span node
+                        let span = document.createElement('span');
+                        span.className = 'badge badge-default badge-pill';
+
+                        // Create time node
+                        let timeNode = document.createTextNode(`${system.readyQueue[iJobs].time} s`);
+                        span.appendChild(timeNode);
+
+                        // Append elements
+                        li.appendChild(span);
                         readyQueue.appendChild(li);
                     }
                 },
@@ -126,10 +154,24 @@
                     system.removeChilds(CPUQueue);
 
                     for (let iJobs = 0; iJobs < system.CPUQueue.length; iJobs++) {
+                        // Create li element
                         let li = document.createElement('li');
-                        li.className = (iJobs === system.CPUQueue.length - 1) ? 'list-group-item active' : 'list-group-item';
+                        li.className = (iJobs === system.CPUQueue.length - 1) ? 'list-group-item justify-content-between active' : 'list-group-item justify-content-between';
+                        
+                        // Create text node
                         let textNode = document.createTextNode(system.CPUQueue[iJobs].text);
                         li.appendChild(textNode);
+
+                        // Create span node
+                        let span = document.createElement('span');
+                        span.className = 'badge badge-default badge-pill';
+
+                        // Create time node
+                        let timeNode = document.createTextNode(`${system.secondsInCPU + 1} s`);
+                        span.appendChild(timeNode);
+                        
+                        // Apend elements
+                        li.appendChild(span);
                         CPUQueue.appendChild(li);
                     }
                 },

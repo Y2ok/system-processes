@@ -66,7 +66,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <h3>CPU</h3>
-                        <ul class="list-group">
+                        <ul class="list-group" id="CPUQueue">
                         </ul>                  
                     </div>     
                 </div>
@@ -76,8 +76,12 @@
             // Global variables
             let system = {
                 jobs: [], // List of jobs
-                fromJobsToReadyTimeout: 2000, // Time in ms how much will take to move job from jobs to ready
                 readyQueue: [], // List of ready jobs
+                CPUQueue: [], // List of CPU jobs
+                fromReadyToCPUTimeout: 1000, // Time in ms how much will take to move job from ready to CPU (ms)
+                fromJobsToReadyTimeout: 2000, // Time in ms how much will take to move job from jobs to ready (ms)
+                CPUTime: 5, // How long will CPU try to execute stuff (seconds)
+                secondsInCPU: 0, // How long stuff is already in CPU
                 // Removes all child elements of a specific element
                 removeChilds: (element) => {
                     while (element.firstChild) {
@@ -108,10 +112,25 @@
 
                     for (let iJobs = 0; iJobs < system.readyQueue.length; iJobs++) {
                         let li = document.createElement('li');
-                        li.className = (iJobs === system.jobs.length - 1) ? 'list-group-item active' : 'list-group-item';
+                        li.className = (iJobs === system.readyQueue.length - 1) ? 'list-group-item active' : 'list-group-item';
                         let textNode = document.createTextNode(system.readyQueue[iJobs].text);
                         li.appendChild(textNode);
                         readyQueue.appendChild(li);
+                    }
+                },
+                // Create CPU queue
+                updateCPUQueue: () => {
+                    let CPUQueue = document.getElementById('CPUQueue');
+
+                    // Removes all child elements
+                    system.removeChilds(CPUQueue);
+
+                    for (let iJobs = 0; iJobs < system.CPUQueue.length; iJobs++) {
+                        let li = document.createElement('li');
+                        li.className = (iJobs === system.CPUQueue.length - 1) ? 'list-group-item active' : 'list-group-item';
+                        let textNode = document.createTextNode(system.CPUQueue[iJobs].text);
+                        li.appendChild(textNode);
+                        CPUQueue.appendChild(li);
                     }
                 },
                 // Add process to queue
@@ -136,7 +155,7 @@
                     // If there are any jobs
                     if (system.jobs.length > 0) {
                         // Push a job to the ready queue
-                        system.readyQueue.push(system.jobs[system.jobs.length-1]);
+                        system.readyQueue.unshift(system.jobs[system.jobs.length - 1]);
 
                         // Remove job from the job queue
                         system.jobs.splice(-1, 1);
@@ -147,10 +166,61 @@
 
                     // Update job queue
                     system.updateJobQueue();
+                },
+                // Move from ready queue to CPU
+                fromReadyToCPU: () => {
+                    // Check if there are any jobs in the CPU queue
+                    if (system.CPUQueue.length > 0) {
+                        // Check if job is already executed
+                        if (system.CPUQueue[0].time <= system.secondsInCPU) {
+                            system.CPUQueue.splice(-1, 1);
+                        } else if (system.secondsInCPU === system.CPUTime) { // Check if job is executing too long
+                            // Remove already executed time from the job.
+                            system.CPUQueue[0].time -= system.CPUTime;
+                            
+                            // Add it back to ready queue.
+                            system.readyQueue.unshift(system.CPUQueue[0]);
+
+                            // Remove element from CPU Queue
+                            system.CPUQueue.splice(-1, 1)
+                        }
+
+                        // Update ready queue
+                        system.updateReadyQueue();
+
+                        // Update CPU queue
+                        system.updateCPUQueue();
+                    }
+
+                    // Check if there are any jobs in the ready queue
+                    // AND that there are no jobs in CPU Queue
+                    if (system.readyQueue.length > 0 && system.CPUQueue.length === 0) {
+                        // Reset timer of CPU
+                        system.secondsInCPU = 0;
+
+                        // Add from ready queue item to CPU queue
+                        system.CPUQueue.unshift(system.readyQueue[system.readyQueue.length - 1]);
+                        
+                        // Remove item from ready queue
+                        system.readyQueue.splice(-1, 1);
+
+                        // Update ready queue
+                        system.updateReadyQueue();
+
+                        // Update CPU queue
+                        system.updateCPUQueue();
+                    }
+
+                    // Add one second to CPU Execution time
+                    system.secondsInCPU += 1;
                 }
             };
 
-            setInterval(system.fromJobsToReady, 2000);
+            // Set system job - from jobs queue to ready queue.
+            setInterval(system.fromJobsToReady, system.fromJobsToReadyTimeout);
+
+            // Set system job - from ready queue to CPU queue;
+            setInterval(system.fromReadyToCPU, system.fromReadyToCPUTimeout);
         </script>
     </body>
 </html>

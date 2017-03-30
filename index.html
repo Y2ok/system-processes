@@ -4,6 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>System process flow</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+        <link rel="stylesheet" href="animate.css" />
         <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
@@ -99,7 +100,7 @@
                     for (let iJobs = 0; iJobs < system.jobs.length; iJobs++) {
                         // Create li element
                         let li = document.createElement('li');
-                        li.className = (iJobs === system.jobs.length - 1) ? 'list-group-item list-group-item-action flex-column align-items-start active' : 'list-group-item list-group-item-action flex-column align-items-start';
+                        li.className = (iJobs === system.jobs.length - 1) ? 'list-group-item list-group-item-action flex-column align-items-start animated zoomOutRight active' : 'list-group-item list-group-item-action flex-column align-items-start';
                         
                         // Create div element
                         let div = document.createElement('div');
@@ -147,8 +148,11 @@
                     for (let iJobs = 0; iJobs < system.readyQueue.length; iJobs++) {
                         // Create li element
                         let li = document.createElement('li');
-                        li.className = (iJobs === system.readyQueue.length - 1) ? 'list-group-item list-group-item-action flex-column align-items-start active' : 'list-group-item list-group-item-action flex-column align-items-start';
-                        
+                        if (system.secondsInCPU === 4) {
+                            li.className = (iJobs === system.readyQueue.length - 1) ? 'list-group-item list-group-item-action flex-column align-items-start animated zoomOutRight active' : 'list-group-item list-group-item-action flex-column align-items-start';
+                        } else {
+                            li.className = (iJobs === system.readyQueue.length - 1) ? 'list-group-item list-group-item-action flex-column align-items-start active' : 'list-group-item list-group-item-action flex-column align-items-start';
+                        }
                         // Create div element
                         let div = document.createElement('div');
                         div.className = 'd-flex w-100 justify-content-between';
@@ -195,8 +199,12 @@
                     for (let iJobs = 0; iJobs < system.CPUQueue.length; iJobs++) {
                         // Create li element
                         let li = document.createElement('li');
-                        li.className = (iJobs === system.CPUQueue.length - 1) ? 'list-group-item justify-content-between active' : 'list-group-item justify-content-between';
-                        
+                        // Show animation on first second
+                        if (system.secondsInCPU === 0) {
+                            li.className = (iJobs === system.CPUQueue.length - 1) ? 'list-group-item justify-content-between active animated zoomInLeft' : 'list-group-item justify-content-between animated zoomInLeft';
+                        } else {
+                            li.className = (iJobs === system.CPUQueue.length - 1) ? 'list-group-item justify-content-between active' : 'list-group-item justify-content-between';
+                        }
                         // Create text node
                         let textNode = document.createTextNode(system.CPUQueue[iJobs].text);
                         li.appendChild(textNode);

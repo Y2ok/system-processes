@@ -56,6 +56,7 @@
                         </div>
                         <div class="row my-2">
                             <div class="col-md-12">
+                                <button type="button" class="btn btn-primary" onclick="system.randomJobs(10)">Generate random jobs</button>
                                 <button type="button" class="btn btn-success float-right" onclick="system.addProcess()">Add Process</button>
                             </div>
                         </div>
@@ -98,13 +99,16 @@
                     for (let iJobs = 0; iJobs < system.jobs.length; iJobs++) {
                         // Create li element
                         let li = document.createElement('li');
-                        li.className = (iJobs === system.jobs.length - 1) ? 'list-group-item justify-content-between active' : 'list-group-item justify-content-between';
+                        li.className = (iJobs === system.jobs.length - 1) ? 'list-group-item list-group-item-action flex-column align-items-start active' : 'list-group-item list-group-item-action flex-column align-items-start';
+                        
+                        // Create div element
+                        let div = document.createElement('div');
+                        div.className = 'd-flex w-100 justify-content-between';
 
                         // Create text node
                         let textNode = document.createTextNode(system.jobs[iJobs].text);
-                        li.appendChild(textNode);
 
-                        // Create span node
+                        // Create span element
                         let span = document.createElement('span');
                         span.className = 'badge badge-default badge-pill';
 
@@ -112,8 +116,24 @@
                         let timeNode = document.createTextNode(`${system.jobs[iJobs].time} s`);
                         span.appendChild(timeNode);
 
+                        // Append to div
+                        div.appendChild(textNode);
+                        div.appendChild(span);
+
+                        // Create break element
+                        let br = document.createElement('br');
+
+                        // Create small element
+                        let small = document.createElement('small');
+
+                        // Create type node
+                        let typeNode = document.createTextNode(`I/O device: ${system.jobs[iJobs].devices.toString()}`);
+                        small.appendChild(typeNode);
+
                         // Append elements
-                        li.appendChild(span);
+                        li.appendChild(div);
+                        li.appendChild(br);
+                        li.appendChild(small);
                         jobQueue.appendChild(li);
                     }
                 },
@@ -127,13 +147,16 @@
                     for (let iJobs = 0; iJobs < system.readyQueue.length; iJobs++) {
                         // Create li element
                         let li = document.createElement('li');
-                        li.className = (iJobs === system.readyQueue.length - 1) ? 'list-group-item justify-content-between active' : 'list-group-item justify-content-between';
+                        li.className = (iJobs === system.readyQueue.length - 1) ? 'list-group-item list-group-item-action flex-column align-items-start active' : 'list-group-item list-group-item-action flex-column align-items-start';
+                        
+                        // Create div element
+                        let div = document.createElement('div');
+                        div.className = 'd-flex w-100 justify-content-between';
 
                         // Create text node
                         let textNode = document.createTextNode(system.readyQueue[iJobs].text);
-                        li.appendChild(textNode);
 
-                        // Create span node
+                        // Create span element
                         let span = document.createElement('span');
                         span.className = 'badge badge-default badge-pill';
 
@@ -141,8 +164,24 @@
                         let timeNode = document.createTextNode(`${system.readyQueue[iJobs].time} s`);
                         span.appendChild(timeNode);
 
+                        // Append to div
+                        div.appendChild(textNode);
+                        div.appendChild(span);
+
+                        // Create break element
+                        let br = document.createElement('br');
+
+                        // Create small element
+                        let small = document.createElement('small');
+
+                        // Create type node
+                        let typeNode = document.createTextNode(`I/O device: ${system.readyQueue[iJobs].devices.toString()}`);
+                        small.appendChild(typeNode);
+
                         // Append elements
-                        li.appendChild(span);
+                        li.appendChild(div);
+                        li.appendChild(br);
+                        li.appendChild(small);
                         readyQueue.appendChild(li);
                     }
                 },
@@ -180,13 +219,13 @@
                     // Add process
                     system.jobs.unshift({
                         text: document.getElementById('jobId').value,
-                        devices: document.getElementById('jobDevices').value,
+                        devices: document.getElementById('jobDevices').checked,
                         time: document.getElementById('jobTime').value
                     });
 
                     // Clear fields
                     document.getElementById('jobId').value = '';
-                    document.getElementById('jobDevices').value = '';
+                    document.getElementById('jobDevices').checked = false;
                     document.getElementById('jobTime').value = '';
 
                     // Update job queue
@@ -255,6 +294,17 @@
 
                     // Add one second to CPU Execution time
                     system.secondsInCPU += 1;
+                },
+                // Create random jobs
+                // count - number of random jobs to create
+                randomJobs: (count) => {
+                    for (let iJob = 0; iJob < count; iJob++) {
+                        system.jobs.unshift({
+                            text: `Job ${iJob + 1}`,
+                            devices: (Math.round(Math.random()) === 1),
+                            time: Math.round(Math.random() * 100)
+                        });
+                    }
                 }
             };
 

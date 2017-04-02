@@ -8,23 +8,40 @@
         <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+        <style>
+            ul {list-style-type: none;}
+            body {margin:15px;}
+        </style>
     </head>
     <body>
         <div class="row">
             <div class="col-md-3">
                 <div class="row">
                     <div class="col-md-12">
-                        <h3>Job queue</h3>
+                        <h3>Job Queue</h3>
+                        <h6>Process status : NEW</h6>
                         <ul class="list-group" id="jobQueue">
+                            <li>No NEW processes in system</li>
                         </ul>   
                     </div>                 
+                </div>
+                 <div class="row my-2">
+                    <div class="col-md-12">
+                    	<h3>IO queue</h3>
+                        <h6>Process status : WAITING</h6>
+                        <ul class="list-group" id="IOQueue">
+                            <li>No processes are waiting for IO</li>
+                        </ul>   
+                    </div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="row">
                     <div class="col-md-12">
                         <h3>Ready queue</h3>
+                        <h6>Process status : READY</h6>
                         <ul class="list-group" id="readyQueue">
+                            <li>No active processes in system</li>
                         </ul> 
                     </div>
                 </div>
@@ -44,7 +61,7 @@
                                 <b>I/O Devices:</b>
                             </div>
                             <div class="col-md-10">
-                                <input type="checkbox" class="form-control" name="devices" id="jobDevices" placeholder="Process ID goes here" />
+                                <input type="checkbox" class="form-control" name="devices" id="jobDevices" />
                             </div>
                         </div>
                         <div class="row my-2">
@@ -52,7 +69,7 @@
                                 <b>Running time:</b>
                             </div>
                             <div class="col-md-9">
-                                <input type="number" class="form-control" name="time" id="jobTime" placeholder="Process ID goes here" />
+                                <input type="number" class="form-control" name="time" id="jobTime" placeholder="Time in seconds" />
                             </div>
                         </div>
                         <div class="row my-2">
@@ -68,7 +85,9 @@
                 <div class="row">
                     <div class="col-md-12">
                         <h3>CPU</h3>
+                        <h6>Process status : RUNNING</h6>
                         <ul class="list-group" id="CPUQueue">
+                            <li>No active processes in system</li>
                         </ul>                  
                     </div>     
                 </div>
@@ -80,10 +99,13 @@
                 jobs: [], // List of jobs
                 readyQueue: [], // List of ready jobs
                 CPUQueue: [], // List of CPU jobs
+                IOQueue: [],
                 fromReadyToCPUTimeout: 1000, // Time in ms how much will take to move job from ready to CPU (ms)
                 fromJobsToReadyTimeout: 2000, // Time in ms how much will take to move job from jobs to ready (ms)
+                fromIOToReadyTimeout: 1000, // Time in ms how much will take to move job from io to ready (ms)
                 CPUTime: 5, // How long will CPU try to execute stuff (seconds)
                 secondsInCPU: 0, // How long stuff is already in CPU
+                secondsInIO: 0,
                 // Removes all child elements of a specific element
                 removeChilds: (element) => {
                     while (element.firstChild) {
@@ -96,6 +118,13 @@
                     
                     // Removes all child elements
                     system.removeChilds(jobQueue);
+
+                    if(system.jobs.length < 1){
+                        let li = document.createElement('li');
+                        let textNode = document.createTextNode('No NEW processes in system');
+                        li.appendChild(textNode);
+                        jobQueue.appendChild(li);
+                    }
 
                     for (let iJobs = 0; iJobs < system.jobs.length; iJobs++) {
                         // Create li element
@@ -144,6 +173,13 @@
 
                     // Removes all child elements
                     system.removeChilds(readyQueue);
+
+                    if(system.readyQueue.length < 1){
+                        let li = document.createElement('li');
+                        let textNode = document.createTextNode('No active processes in system');
+                        li.appendChild(textNode);
+                        readyQueue.appendChild(li);
+                    }
 
                     for (let iJobs = 0; iJobs < system.readyQueue.length; iJobs++) {
                         // Create li element
@@ -222,6 +258,47 @@
                         CPUQueue.appendChild(li);
                     }
                 },
+                updateIOQueue: () => {
+
+                	let IOQueue = document.getElementById('IOQueue');
+
+                    // Removes all child elements
+                    system.removeChilds(IOQueue);
+
+                    if(system.IOQueue.length < 1){
+                        let li = document.createElement('li');
+                        let textNode = document.createTextNode('No processes are waiting for IO');
+                        li.appendChild(textNode);
+                        IOQueue.appendChild(li);
+                    }
+
+                     for (let iJobs = 0; iJobs < system.IOQueue.length; iJobs++) {
+                     	
+                        // Create li element
+                        let li = document.createElement('li');
+                        // Show animation on first second
+                        if (system.secondsInIO === 0) {
+                            li.className = (iJobs === system.IOQueue.length - 1) ? 'list-group-item justify-content-between active animated zoomInLeft' : 'list-group-item justify-content-between animated zoomInLeft';
+                        } else {
+                            li.className = (iJobs === system.IOQueue.length - 1) ? 'list-group-item justify-content-between active' : 'list-group-item justify-content-between';
+                        }
+                        // Create text node
+                        let textNode = document.createTextNode(system.IOQueue[iJobs].text);
+                        li.appendChild(textNode);
+
+                        // Create span node
+                        let span = document.createElement('span');
+                        span.className = 'badge badge-default badge-pill';
+
+                        // Create time node
+                        let timeNode = document.createTextNode(`${system.secondsInIO + 1} s`);
+                        span.appendChild(timeNode);
+                        
+                        // Apend elements
+                        li.appendChild(span);
+                        IOQueue.appendChild(li);
+                    }
+                },
                 // Add process to queue
                 addProcess: () => {
                     // Add process
@@ -256,6 +333,30 @@
                     // Update job queue
                     system.updateJobQueue();
                 },
+
+                fromIOToReady: () => {
+
+                	// If there are any jobs in IO Queue
+                	if(system.IOQueue.length > 0){
+                        console.log("fromIOToReady : " + system.secondsInIO);
+                		if(system.secondsInIO > 2) {
+
+                			// Push job to ready queue
+                			system.readyQueue.unshift(system.IOQueue[system.IOQueue.length-1]);
+                			// Remove job from IO Queue
+                			system.IOQueue.splice(-1,1);
+                			system.secondsInIO = 0;
+                		}
+                	}
+
+                	// Update ready queue
+                    system.updateReadyQueue();
+
+                    // Update IO Queue
+                	system.updateIOQueue();
+
+                	system.secondsInIO += 1; 
+                },
                 // Move from ready queue to CPU
                 fromReadyToCPU: () => {
                     // Check if there are any jobs in the CPU queue
@@ -279,6 +380,10 @@
 
                         // Update CPU queue
                         system.updateCPUQueue();
+
+                        // Add one second to CPU Execution time
+	                    system.secondsInCPU += 1;
+
                     }
 
                     // Check if there are any jobs in the ready queue
@@ -298,6 +403,33 @@
 
                         // Update CPU queue
                         system.updateCPUQueue();
+
+                        if(system.CPUQueue[0].devices){
+							
+							system.secondsInCPU = 0;
+                        	system.CPUQueue[0].devices = false;
+
+                        	system.IOQueue.unshift(system.CPUQueue[system.CPUQueue.length - 1]);
+                        	system.CPUQueue.splice(-1, 1);
+
+                        	console.log("IO active, moving to IOQueue");
+
+                        	if(system.readyQueue.length > 0) {
+
+                        		system.CPUQueue.unshift(system.readyQueue[system.readyQueue.length - 1]);
+                       
+	                        	// Remove item from ready queue
+	                        	system.readyQueue.splice(-1, 1);
+	                    	}
+
+	                        system.updateIOQueue();
+
+	                        // Update ready queue
+	                        system.updateReadyQueue();
+
+	                        // Update CPU queue
+	                        system.updateCPUQueue();
+                        }
                     }
 
                     // Add one second to CPU Execution time
@@ -307,7 +439,7 @@
                 // count - number of random jobs to create
                 randomJobs: (count) => {
                     for (let iJob = 0; iJob < count; iJob++) {
-                        system.jobs.unshift({
+                  	      system.jobs.unshift({
                             text: `Job ${iJob + 1}`,
                             devices: (Math.round(Math.random()) === 1),
                             time: Math.round(Math.random() * 100)
@@ -321,6 +453,8 @@
 
             // Set system job - from ready queue to CPU queue;
             setInterval(system.fromReadyToCPU, system.fromReadyToCPUTimeout);
+
+            setInterval(system.fromIOToReady, system.fromIOToReadyTimeout);
         </script>
     </body>
 </html>

@@ -337,8 +337,7 @@
                 fromIOToReady: () => {
 
                 	// If there are any jobs in IO Queue
-                	if(system.IOQueue.length > 0){
-                        console.log("fromIOToReady : " + system.secondsInIO);
+                	if(system.IOQueue.length > 0) {
                 		if(system.secondsInIO > 2) {
 
                 			// Push job to ready queue
@@ -347,6 +346,7 @@
                 			system.IOQueue.splice(-1,1);
                 			system.secondsInIO = 0;
                 		}
+                        system.secondsInIO += 1; 
                 	}
 
                 	// Update ready queue
@@ -355,7 +355,7 @@
                     // Update IO Queue
                 	system.updateIOQueue();
 
-                	system.secondsInIO += 1; 
+                	
                 },
                 // Move from ready queue to CPU
                 fromReadyToCPU: () => {
@@ -411,8 +411,6 @@
 
                         	system.IOQueue.unshift(system.CPUQueue[system.CPUQueue.length - 1]);
                         	system.CPUQueue.splice(-1, 1);
-
-                        	console.log("IO active, moving to IOQueue");
 
                         	if(system.readyQueue.length > 0) {
 
